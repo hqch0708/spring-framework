@@ -19,7 +19,6 @@ package org.springframework.aop.interceptor;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -32,8 +31,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
+import org.springframework.core.task.AbstractAsyncThread;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.AsyncThread;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -125,7 +124,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			}
 		}
 
-		AsyncThread<Object> task = new AsyncThread<Object>(allParamMap) {
+		AbstractAsyncThread<Object> task = new AbstractAsyncThread<Object>(allParamMap) {
 			@Override
 			public Object call() throws Exception {
 				try {
