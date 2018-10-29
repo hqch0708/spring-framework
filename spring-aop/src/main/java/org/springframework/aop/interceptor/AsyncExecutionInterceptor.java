@@ -118,7 +118,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 			for (AsyncExecutionPreProcessor preProcessor : preProcessorList){
 				Map<String, Object> paramMap = preProcessor.transferParamToAsyncExecution(invocation);
 				if (paramMap != null && !paramMap.isEmpty()){
-					allParamMap.putAll(preProcessor.transferParamToAsyncExecution(invocation));
+					allParamMap.putAll(paramMap);
 				}
 
 			}
