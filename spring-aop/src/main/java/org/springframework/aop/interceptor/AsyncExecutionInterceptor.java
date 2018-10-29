@@ -17,6 +17,8 @@
 package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.AsyncThread;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -111,25 +114,39 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport imple
 					"No executor specified and no default executor set on AsyncExecutionInterceptor either");
 		}
 
-		Callable<Object> task = () -> {
-			try {
-				if (!preProcessorList.isEmpty()){
-					for (AsyncExecutionPreProcessor preProcessor : preProcessorList){
-						preProcessor.preProcessBeforeAsyncExecution(invocation);
+		Map<String, Object> allParamMap = new LinkedHashMap<>();
+		if (!preProcessorList.isEmpty()){
+			for (AsyncExecutionPreProcessor preProcessor : preProcessorList){
+				Map<String, Object> paramMap = preProcessor.transferParamToAsyncExecution(invocation);
+				if (paramMap != null && !paramMap.isEmpty()){
+					allParamMap.putAll(preProcessor.transferParamToAsyncExecution(invocation));
+				}
+
+			}
+		}
+
+		AsyncThread<Object> task = new AsyncThread<Object>(allParamMap) {
+			@Override
+			public Object call() throws Exception {
+				try {
+					if (!preProcessorList.isEmpty()){
+						for (AsyncExecutionPreProcessor preProcessor : preProcessorList){
+							preProcessor.preProcessBeforeAsyncExecution(invocation, this.getMaramMap());
+						}
+					}
+					Object result = invocation.proceed();
+					if (result instanceof Future) {
+						return ((Future<?>) result).get();
 					}
 				}
-				Object result = invocation.proceed();
-				if (result instanceof Future) {
-					return ((Future<?>) result).get();
+				catch (ExecutionException ex) {
+					handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
 				}
+				catch (Throwable ex) {
+					handleError(ex, userDeclaredMethod, invocation.getArguments());
+				}
+				return null;
 			}
-			catch (ExecutionException ex) {
-				handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
-			}
-			catch (Throwable ex) {
-				handleError(ex, userDeclaredMethod, invocation.getArguments());
-			}
-			return null;
 		};
 
 		return doSubmit(task, executor, invocation.getMethod().getReturnType());

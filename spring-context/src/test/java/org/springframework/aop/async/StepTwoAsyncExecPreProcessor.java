@@ -1,9 +1,12 @@
 package org.springframework.aop.async;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.groovy.util.Maps;
 import org.springframework.aop.AsyncExecutionPreProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+
+import java.util.Map;
 
 /**
  * @author huqichao
@@ -18,7 +21,18 @@ public class StepTwoAsyncExecPreProcessor implements AsyncExecutionPreProcessor 
 	 * @param invocation the method to intercept and make asynchronous
 	 */
 	@Override
-	public void preProcessBeforeAsyncExecution(MethodInvocation invocation) {
-		System.out.println("StepTwoAsyncExecPreProcessor start");
+	public void preProcessBeforeAsyncExecution(MethodInvocation invocation, Map<String, Object> paramMap) {
+		System.out.println("StepTwoAsyncExecPreProcessor start key2:" + paramMap.get("key2"));
+	}
+
+	/**
+	 * Transfer parameters to asynchronous execution.
+	 *
+	 * @param invocation the method to intercept and make asynchronous
+	 * @return Transfer parameters
+	 */
+	@Override
+	public Map<String, Object> transferParamToAsyncExecution(MethodInvocation invocation) {
+		return null;
 	}
 }
