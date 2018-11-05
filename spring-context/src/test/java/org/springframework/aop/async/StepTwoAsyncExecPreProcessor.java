@@ -1,7 +1,6 @@
 package org.springframework.aop.async;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.groovy.util.Maps;
 import org.springframework.aop.AsyncExecutionPreProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;

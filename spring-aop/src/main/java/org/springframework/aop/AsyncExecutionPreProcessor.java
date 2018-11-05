@@ -1,6 +1,7 @@
 package org.springframework.aop;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.lang.Nullable;
 
 import java.util.Map;
 
@@ -24,5 +25,6 @@ public interface AsyncExecutionPreProcessor {
 	 * @param invocation the method to intercept and make asynchronous
 	 * @return Transfer parameters
 	 */
+	@Nullable
 	Map<String, Object> transferParamToAsyncExecution(MethodInvocation invocation);
 }
